@@ -14,28 +14,8 @@ export function usePOSDesigner() {
     setResult(null);
 
     try {
-      const hasArtwork = brief.artwork instanceof File;
-      
-      const formData = new FormData();
-      formData.append('brand_name', brief.brand_name);
-      formData.append('product_category', brief.product_category);
-      formData.append('display_type', brief.display_type);
-      formData.append('quantity', brief.quantity.toString());
-      formData.append('objective', brief.objective);
-      
-      if (brief.size) formData.append('size', brief.size);
-      if (brief.material) formData.append('material', brief.material);
-      if (brief.budget) formData.append('budget', brief.budget);
-      if (brief.store_environment) formData.append('store_environment', brief.store_environment);
-      if (brief.placement_location?.length) {
-        formData.append('placement_location', brief.placement_location.join(', '));
-      }
-      if (hasArtwork && brief.artwork) {
-        formData.append('artwork', brief.artwork);
-      }
-
       const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
-        body: hasArtwork ? formData : {
+        body: {
           brand_name: brief.brand_name,
           product_category: brief.product_category,
           display_type: brief.display_type,
