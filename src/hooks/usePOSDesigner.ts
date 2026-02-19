@@ -1,8 +1,9 @@
 import { useState, useCallback } from 'react';
 import { POSDesignBrief, POSDesignResponse } from '@/types/posDesigner';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
-const WEBHOOK_URL = 'https://n8n.srv1141999.hstgr.cloud/webhook/pos-display-design';
+const FUNCTION_NAME = 'pos-design-proxy';
 
 export function usePOSDesigner() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,37 +14,28 @@ export function usePOSDesigner() {
     setResult(null);
 
     try {
-      // Prepare form data for multipart submission if artwork exists
       const hasArtwork = brief.artwork instanceof File;
       
-      let response: Response;
+      const formData = new FormData();
+      formData.append('brand_name', brief.brand_name);
+      formData.append('product_category', brief.product_category);
+      formData.append('display_type', brief.display_type);
+      formData.append('quantity', brief.quantity.toString());
+      formData.append('objective', brief.objective);
+      
+      if (brief.size) formData.append('size', brief.size);
+      if (brief.material) formData.append('material', brief.material);
+      if (brief.budget) formData.append('budget', brief.budget);
+      if (brief.store_environment) formData.append('store_environment', brief.store_environment);
+      if (brief.placement_location?.length) {
+        formData.append('placement_location', brief.placement_location.join(', '));
+      }
+      if (hasArtwork && brief.artwork) {
+        formData.append('artwork', brief.artwork);
+      }
 
-      if (hasArtwork) {
-        const formData = new FormData();
-        formData.append('brand_name', brief.brand_name);
-        formData.append('product_category', brief.product_category);
-        formData.append('display_type', brief.display_type);
-        formData.append('quantity', brief.quantity.toString());
-        formData.append('objective', brief.objective);
-        
-        if (brief.size) formData.append('size', brief.size);
-        if (brief.material) formData.append('material', brief.material);
-        if (brief.budget) formData.append('budget', brief.budget);
-        if (brief.store_environment) formData.append('store_environment', brief.store_environment);
-        if (brief.placement_location?.length) {
-          formData.append('placement_location', brief.placement_location.join(', '));
-        }
-        if (brief.artwork) {
-          formData.append('artwork', brief.artwork);
-        }
-
-        response = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          body: formData,
-        });
-      } else {
-        // JSON submission without artwork
-        const payload = {
+      const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
+        body: hasArtwork ? formData : {
           brand_name: brief.brand_name,
           product_category: brief.product_category,
           display_type: brief.display_type,
@@ -54,30 +46,20 @@ export function usePOSDesigner() {
           budget: brief.budget || undefined,
           store_environment: brief.store_environment || undefined,
           placement_location: brief.placement_location?.join(', ') || undefined,
-        };
+        },
+      });
 
-        response = await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-      }
+      if (error) throw error;
 
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-
-      const data: POSDesignResponse = await response.json();
+      const responseData = data as POSDesignResponse;
       
-      if (data.status === 'limit_reached') {
+      if (responseData.status === 'limit_reached') {
         toast.warning('Daily limit reached. Please try again tomorrow.');
-      } else if (data.status === 'success') {
+      } else if (responseData.status === 'success') {
         toast.success('Design concepts generated successfully!');
       }
 
-      setResult(data);
+      setResult(responseData);
     } catch (error) {
       console.error('POS Designer error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
