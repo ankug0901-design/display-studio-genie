@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FileText, Settings2, Upload, Sparkles, ChevronDown } from 'lucide-react';
+import { FileText, Settings2, Sparkles, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -35,7 +35,6 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
     budget: '',
     store_environment: '',
     placement_location: [],
-    artwork: null,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -53,11 +52,6 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
       ? current.filter(l => l !== location)
       : [...current, location];
     updateField('placement_location', updated);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    updateField('artwork', file);
   };
 
   const isFormValid = formData.brand_name && formData.product_category && 
@@ -222,31 +216,6 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
           </FormSection>
         </CollapsibleContent>
       </Collapsible>
-
-      {/* Artwork Upload */}
-      <FormSection title="Brand Artwork" icon={<Upload className="w-4 h-4 text-accent" />}>
-        <FormField 
-          label="Upload Key Visual" 
-          htmlFor="artwork"
-          helper="Upload your brand key visual or campaign artwork. This will be used to adapt colors and styling to your brand."
-        >
-          <div className="relative">
-            <input
-              type="file"
-              id="artwork"
-              accept="image/*,.pdf"
-              onChange={handleFileChange}
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-            />
-            <div className="flex items-center justify-center gap-3 p-8 border-2 border-dashed border-border rounded-xl hover:border-accent/50 hover:bg-accent/5 transition-all duration-300">
-              <Upload className="w-5 h-5 text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                {formData.artwork ? formData.artwork.name : 'Click to upload or drag & drop'}
-              </span>
-            </div>
-          </div>
-        </FormField>
-      </FormSection>
 
       {/* Submit Button */}
       <Button
