@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Lightbulb, Image, AlertCircle, ChevronDown, ChevronUp, RefreshCw } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Lightbulb, Image, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Tag, MapPin, Store, Package, Hash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { POSDesignResponse } from '@/types/posDesigner';
 
@@ -9,8 +9,47 @@ interface ResultsSectionProps {
   onReset: () => void;
 }
 
+interface ParsedConcept {
+  title: string;
+  bullets: string[];
+}
+
+function parseConceptsText(text: string): ParsedConcept[] {
+  const concepts: ParsedConcept[] = [];
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+
+  let current: ParsedConcept | null = null;
+
+  for (const line of lines) {
+    // Match lines like "CONCEPT 1: Title" or "---" separators
+    const conceptMatch = line.match(/^(?:---\s*)?CONCEPT\s+\d+:\s*(.+)/i);
+    if (conceptMatch) {
+      if (current) concepts.push(current);
+      current = { title: conceptMatch[1].trim(), bullets: [] };
+      continue;
+    }
+    if (line === '---') continue;
+    if (current) {
+      // Strip leading bullet markers
+      const cleaned = line.replace(/^[-•*]\s*/, '').trim();
+      if (cleaned) current.bullets.push(cleaned);
+    }
+  }
+  if (current) concepts.push(current);
+  return concepts;
+}
+
+function isInternalRef(url: string | null | undefined): boolean {
+  return !url || url.startsWith('filesystem-v2:');
+}
+
 export function ResultsSection({ result, isLoading, onReset }: ResultsSectionProps) {
   const [conceptsExpanded, setConceptsExpanded] = useState(true);
+
+  const concepts = useMemo(() => {
+    if (!result?.concepts_text) return [];
+    return parseConceptsText(result.concepts_text);
+  }, [result?.concepts_text]);
 
   if (isLoading) {
     return (
@@ -39,7 +78,7 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
 
   if (!result) return null;
 
-  if (result.status === 'error' || result.status === 'limit_reached') {
+  if (result.status !== 'success') {
     return (
       <div className="results-card animate-fade-in">
         <div className="p-8 sm:p-12 flex flex-col items-center justify-center min-h-[300px] text-center">
@@ -61,6 +100,14 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
     );
   }
 
+  const metaItems = [
+    { icon: Tag, label: 'Brand', value: result.brand },
+    { icon: Package, label: 'POSM Type', value: result.posm_type },
+    { icon: Store, label: 'Store Environment', value: result.store_environment },
+    { icon: MapPin, label: 'Placement', value: result.placement_location },
+    { icon: Hash, label: 'Quantity', value: result.quantity?.toLocaleString() },
+  ].filter(item => item.value);
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
@@ -79,33 +126,64 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
         </Button>
       </div>
 
-      {/* 3D Render */}
-      {result.hero_render && (
-        <div className="results-card overflow-hidden">
-          <div className="p-4 border-b border-border/50 flex items-center gap-2">
-            <Image className="w-4 h-4 text-accent" />
-            <span className="text-sm font-medium text-foreground">3D Visualization</span>
-          </div>
-          <div className="relative bg-gradient-to-br from-secondary/50 to-muted/50 flex items-center justify-center p-4">
-            <img
-              src={result.hero_render}
-              alt="POS Display 3D Render"
-              className="max-w-full max-h-[500px] object-contain rounded-lg shadow-lg"
-            />
+      {/* Brief Metadata */}
+      {metaItems.length > 0 && (
+        <div className="results-card p-5">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {metaItems.map(({ icon: Icon, label, value }) => (
+              <div key={label} className="flex items-start gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                  <Icon className="w-4 h-4 text-accent" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs text-muted-foreground">{label}</p>
+                  <p className="text-sm font-medium text-foreground truncate">{value}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Design Concepts Text */}
-      {result.concepts_text && (
-        <div className="results-card">
+      {/* 3D Render / Placeholder */}
+      <div className="results-card overflow-hidden">
+        <div className="p-4 border-b border-border/50 flex items-center gap-2">
+          <Image className="w-4 h-4 text-accent" />
+          <span className="text-sm font-medium text-foreground">3D Visualization</span>
+        </div>
+        {isInternalRef(result.hero_render) ? (
+          <div className="flex flex-col items-center justify-center py-16 px-6 bg-gradient-to-br from-secondary/50 to-muted/50 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
+              <Image className="w-8 h-8 text-accent/50" />
+            </div>
+            <h4 className="text-sm font-semibold text-foreground mb-1">Render Coming Soon</h4>
+            <p className="text-xs text-muted-foreground max-w-xs">
+              Your photorealistic 3D visualization is being processed and will be available shortly.
+            </p>
+          </div>
+        ) : (
+          <div className="relative bg-gradient-to-br from-secondary/50 to-muted/50 flex items-center justify-center p-4">
+            <img
+              src={result.hero_render!}
+              alt="POS Display 3D Render"
+              className="max-w-full max-h-[500px] object-contain rounded-lg shadow-lg"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Design Concepts - Parsed into Cards */}
+      {concepts.length > 0 && (
+        <div>
           <button
             onClick={() => setConceptsExpanded(!conceptsExpanded)}
-            className="w-full p-4 border-b border-border/50 flex items-center justify-between hover:bg-secondary/30 transition-colors"
+            className="w-full p-4 rounded-xl bg-card border border-border/50 flex items-center justify-between hover:bg-secondary/30 transition-colors mb-4"
           >
             <div className="flex items-center gap-2">
               <Lightbulb className="w-4 h-4 text-accent" />
-              <span className="text-sm font-medium text-foreground">Design Concepts</span>
+              <span className="text-sm font-medium text-foreground">
+                Design Concepts ({concepts.length})
+              </span>
             </div>
             {conceptsExpanded ? (
               <ChevronUp className="w-4 h-4 text-muted-foreground" />
@@ -113,16 +191,44 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
               <ChevronDown className="w-4 h-4 text-muted-foreground" />
             )}
           </button>
-          
+
           {conceptsExpanded && (
-            <div className="p-6">
-              <div className="prose prose-sm max-w-none text-foreground/90">
-                <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed bg-transparent p-0 m-0 overflow-visible">
-                  {result.concepts_text}
-                </pre>
-              </div>
+            <div className="grid gap-4">
+              {concepts.map((concept, idx) => (
+                <div key={idx} className="results-card p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-6 h-6 rounded-full bg-accent/15 text-accent text-xs font-bold flex items-center justify-center">
+                      {idx + 1}
+                    </span>
+                    <h4 className="text-base font-display font-semibold text-foreground">
+                      {concept.title}
+                    </h4>
+                  </div>
+                  <ul className="space-y-2">
+                    {concept.bullets.map((bullet, bIdx) => (
+                      <li key={bIdx} className="flex items-start gap-2 text-sm text-foreground/80">
+                        <span className="w-1.5 h-1.5 rounded-full bg-accent/40 mt-1.5 shrink-0" />
+                        {bullet}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Fallback: raw text if parsing yielded nothing */}
+      {concepts.length === 0 && result.concepts_text && result.concepts_text !== 'Design concepts not available' && (
+        <div className="results-card p-6">
+          <div className="flex items-center gap-2 mb-3">
+            <Lightbulb className="w-4 h-4 text-accent" />
+            <span className="text-sm font-medium text-foreground">Design Concepts</span>
+          </div>
+          <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed text-foreground/90">
+            {result.concepts_text}
+          </pre>
         </div>
       )}
     </div>

@@ -1,24 +1,25 @@
 export interface POSDesignBrief {
-  // Required fields
   brand_name: string;
   product_category: string;
   display_type: string;
   quantity: number;
   objective: string;
-  
-  // Optional fields
   size?: string;
   material?: string;
   budget?: string;
   store_environment?: string;
   placement_location?: string[];
-  artwork?: File | null;
 }
 
 export interface POSDesignResponse {
   status: 'success' | 'error' | 'limit_reached';
   brand?: string;
+  product_category?: string;
   posm_type?: string;
+  quantity?: number;
+  objective?: string;
+  store_environment?: string;
+  placement_location?: string;
   concepts_text?: string;
   hero_render?: string | null;
   message?: string;
