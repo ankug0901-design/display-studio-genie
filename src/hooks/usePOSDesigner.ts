@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const FUNCTION_NAME = 'pos-design-proxy';
-const MAX_WEBHOOK_PAYLOAD_BYTES = 900 * 1024;
-const MAX_ARTWORK_FILE_BYTES = 700 * 1024;
+const MAX_WEBHOOK_PAYLOAD_BYTES = 1800 * 1024;
+const MAX_ARTWORK_FILE_BYTES = 1200 * 1024;
 
 export function usePOSDesigner() {
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +80,7 @@ export function usePOSDesigner() {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       if (errorMessage === 'ARTWORK_TOO_LARGE' || errorMessage === 'PAYLOAD_TOO_LARGE') {
-        const message = 'Artwork is too large for processing. Please upload a smaller file (recommended under 700KB).';
+        const message = 'Artwork is too large for processing. Please upload a smaller file (recommended under 1200KB).';
         toast.error(message);
         setResult({
           status: 'error',

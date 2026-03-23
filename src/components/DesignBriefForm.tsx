@@ -24,7 +24,7 @@ interface DesignBriefFormProps {
 }
 
 export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
-  const MAX_ARTWORK_FILE_BYTES = 700 * 1024;
+  const MAX_ARTWORK_FILE_BYTES = 1200 * 1024;
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -135,7 +135,7 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
             <FormField 
               label="Design / Artwork File" 
               htmlFor="artwork"
-              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — recommended under 700KB)"
+              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — recommended under 1200KB)"
             >
               <input
                 ref={fileInputRef}
@@ -147,7 +147,7 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
                   const file = e.target.files?.[0] || null;
                   if (file && file.size > MAX_ARTWORK_FILE_BYTES) {
                     setArtworkFile(null);
-                    toast.error('File too large. Please upload artwork under 700KB.');
+                    toast.error('File too large. Please upload artwork under 1200KB.');
                     if (fileInputRef.current) fileInputRef.current.value = '';
                     return;
                   }

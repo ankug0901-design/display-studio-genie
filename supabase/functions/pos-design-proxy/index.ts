@@ -42,7 +42,7 @@ serve(async (req) => {
           status: "error",
           error: "payload_too_large",
           message:
-            "Artwork file is too large for processing. Please upload a smaller file (recommended under 700KB).",
+            "Artwork file is too large for processing. Please upload a smaller file (recommended under 1200KB).",
         }),
         {
           status: 413,
