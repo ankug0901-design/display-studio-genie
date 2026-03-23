@@ -10,33 +10,26 @@ interface ResultsSectionProps {
 }
 
 interface ParsedConcept {
+  number: number;
   title: string;
   bullets: string[];
 }
 
 function parseConceptsText(text: string): ParsedConcept[] {
-  const concepts: ParsedConcept[] = [];
-  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
-
-  let current: ParsedConcept | null = null;
-
-  for (const line of lines) {
-    // Match lines like "CONCEPT 1: Title" or "---" separators
-    const conceptMatch = line.match(/^(?:---\s*)?CONCEPT\s+\d+:\s*(.+)/i);
-    if (conceptMatch) {
-      if (current) concepts.push(current);
-      current = { title: conceptMatch[1].trim(), bullets: [] };
-      continue;
-    }
-    if (line === '---') continue;
-    if (current) {
-      // Strip leading bullet markers
-      const cleaned = line.replace(/^[-•*]\s*/, '').trim();
-      if (cleaned) current.bullets.push(cleaned);
-    }
-  }
-  if (current) concepts.push(current);
-  return concepts;
+  return text
+    .split(/CONCEPT \d+:/i)
+    .filter(c => c.trim().length > 0)
+    .map((c, i) => {
+      const lines = c.trim().split('\n').map(l => l.trim()).filter(Boolean);
+      const title = lines[0]?.replace(/^[-—–•*]\s*/, '').trim() || `Concept ${i + 1}`;
+      const bullets = lines.slice(1)
+        .filter(l => l.startsWith('-') || l.startsWith('•') || l.startsWith('*'))
+        .map(l => l.replace(/^[-•*]\s*/, '').trim())
+        .filter(Boolean);
+      // If no bullet lines found, treat all lines after title as bullets
+      const finalBullets = bullets.length > 0 ? bullets : lines.slice(1).map(l => l.replace(/^[-•*]\s*/, '').trim()).filter(Boolean);
+      return { number: i + 1, title, bullets: finalBullets };
+    });
 }
 
 function isInternalRef(url: string | null | undefined): boolean {
