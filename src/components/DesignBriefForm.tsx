@@ -16,6 +16,7 @@ import {
   STORE_ENVIRONMENTS,
   PLACEMENT_LOCATIONS,
 } from '@/types/posDesigner';
+import { toast } from 'sonner';
 
 interface DesignBriefFormProps {
   onSubmit: (brief: POSDesignBrief, artworkFile?: File | null) => void;
@@ -23,6 +24,7 @@ interface DesignBriefFormProps {
 }
 
 export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
+  const MAX_ARTWORK_FILE_BYTES = 700 * 1024;
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -133,7 +135,7 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
             <FormField 
               label="Design / Artwork File" 
               htmlFor="artwork"
-              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — max 5MB)"
+              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — recommended under 700KB)"
             >
               <input
                 ref={fileInputRef}
@@ -143,8 +145,10 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
                 className="hidden"
                 onChange={e => {
                   const file = e.target.files?.[0] || null;
-                  if (file && file.size > 5 * 1024 * 1024) {
+                  if (file && file.size > MAX_ARTWORK_FILE_BYTES) {
                     setArtworkFile(null);
+                    toast.error('File too large. Please upload artwork under 700KB.');
+                    if (fileInputRef.current) fileInputRef.current.value = '';
                     return;
                   }
                   setArtworkFile(file);
