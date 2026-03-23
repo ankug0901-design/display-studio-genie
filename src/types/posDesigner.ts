@@ -44,7 +44,7 @@ export const DISPLAY_TYPES = [
   'Floor Standing Unit (FSU)',
   'Gondola End Display',
   'Wall Display / Category Branding',
-  'Parasite Hanger',
+  'Parasite',
   'Clip Strip',
   'Display Arch / Header',
   'Checkout Counter Display',
