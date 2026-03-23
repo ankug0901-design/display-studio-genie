@@ -135,7 +135,7 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
             <FormField 
               label="Design / Artwork File" 
               htmlFor="artwork"
-              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — recommended under 700KB)"
+              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — recommended under 1200KB)"
             >
               <input
                 ref={fileInputRef}
