@@ -58,6 +58,8 @@ export const MATERIALS = [
   'Corrugated Cardboard',
   'Sunboard / Foam Board',
   'Metal / Steel',
+  'Plastic Honeycomb',
+  'Corrugated Plastic / PP Sheets',
   'Mixed Materials',
   'Eco-friendly / Recyclable',
   'No Preference'
@@ -80,5 +82,6 @@ export const PLACEMENT_LOCATIONS = [
   'End Cap / Gondola End',
   'Store Entrance',
   'Window Display Area',
-  'Near Competitor Products'
+  'Near Competitor Products',
+  'GT Store'
 ] as const;

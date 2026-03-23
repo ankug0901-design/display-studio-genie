@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FileText, Settings2, Sparkles, ChevronDown } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { FileText, Settings2, Sparkles, ChevronDown, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,6 +24,8 @@ interface DesignBriefFormProps {
 
 export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [artworkFile, setArtworkFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<POSDesignBrief>({
     brand_name: '',
     product_category: '',
@@ -124,6 +126,55 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
                 onChange={e => updateField('objective', e.target.value)}
                 className="premium-border min-h-[100px] resize-none"
               />
+            </FormField>
+          </div>
+
+          <div className="sm:col-span-2">
+            <FormField 
+              label="Design / Artwork File" 
+              htmlFor="artwork"
+              helper="Upload brand artwork, logo, or reference design (PDF, PNG, JPG — max 5MB)"
+            >
+              <input
+                ref={fileInputRef}
+                type="file"
+                id="artwork"
+                accept=".pdf,.png,.jpg,.jpeg,.ai,.psd"
+                className="hidden"
+                onChange={e => {
+                  const file = e.target.files?.[0] || null;
+                  if (file && file.size > 5 * 1024 * 1024) {
+                    setArtworkFile(null);
+                    return;
+                  }
+                  setArtworkFile(file);
+                }}
+              />
+              {artworkFile ? (
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-accent/10 border border-accent/20">
+                  <FileText className="w-5 h-5 text-accent shrink-0" />
+                  <span className="text-sm text-foreground truncate flex-1">{artworkFile.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setArtworkFile(null);
+                      if (fileInputRef.current) fileInputRef.current.value = '';
+                    }}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="w-full flex items-center justify-center gap-2 p-4 rounded-lg border-2 border-dashed border-muted-foreground/25 hover:border-accent/50 hover:bg-accent/5 transition-colors text-sm text-muted-foreground"
+                >
+                  <Upload className="w-4 h-4" />
+                  Click to upload artwork
+                </button>
+              )}
             </FormField>
           </div>
         </div>
