@@ -36,6 +36,21 @@ serve(async (req) => {
 
     const data = await response.text();
 
+    if (response.status === 413) {
+      return new Response(
+        JSON.stringify({
+          status: "error",
+          error: "payload_too_large",
+          message:
+            "Artwork file is too large for processing. Please upload a smaller file (recommended under 700KB).",
+        }),
+        {
+          status: 413,
+          headers: { ...corsHeaders, "content-type": "application/json" },
+        }
+      );
+    }
+
     return new Response(data, {
       status: response.status,
       headers: {
@@ -45,8 +60,9 @@ serve(async (req) => {
     });
   } catch (error) {
     console.error("Proxy error:", error);
+    const message = error instanceof Error ? error.message : "Unknown error";
     return new Response(
-      JSON.stringify({ status: "error", error: error.message }),
+      JSON.stringify({ status: "error", error: message }),
       { status: 500, headers: { ...corsHeaders, "content-type": "application/json" } }
     );
   }
