@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { FileText, Settings2, Sparkles, ChevronDown } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { FileText, Settings2, Sparkles, ChevronDown, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
