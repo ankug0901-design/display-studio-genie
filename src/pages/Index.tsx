@@ -32,7 +32,7 @@ const Index = () => {
             {/* Form Section - Hidden when showing results */}
             {!result && (
               <div className="animate-slide-up">
-                <DesignBriefForm onSubmit={submitBrief} isLoading={isLoading} />
+                <DesignBriefForm onSubmit={(brief, file) => submitBrief(brief, file)} isLoading={isLoading} />
               </div>
             )}
 
