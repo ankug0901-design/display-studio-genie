@@ -4,10 +4,17 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const FUNCTION_NAME = 'pos-design-proxy';
+const MAX_WEBHOOK_PAYLOAD_BYTES = 900 * 1024;
+const MAX_ARTWORK_FILE_BYTES = 700 * 1024;
 
 export function usePOSDesigner() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<POSDesignResponse | null>(null);
+
+  const estimatePayloadSize = (payload: Record<string, unknown>) => {
+    const json = JSON.stringify(payload);
+    return new TextEncoder().encode(json).length;
+  };
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -41,8 +48,16 @@ export function usePOSDesigner() {
       };
 
       if (artworkFile) {
+        if (artworkFile.size > MAX_ARTWORK_FILE_BYTES) {
+          throw new Error('ARTWORK_TOO_LARGE');
+        }
+
         payload.artwork_base64 = await fileToBase64(artworkFile);
         payload.artwork_mime_type = artworkFile.type;
+      }
+
+      if (estimatePayloadSize(payload) > MAX_WEBHOOK_PAYLOAD_BYTES) {
+        throw new Error('PAYLOAD_TOO_LARGE');
       }
 
       const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
@@ -63,6 +78,17 @@ export function usePOSDesigner() {
     } catch (error) {
       console.error('POS Designer error:', error);
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+
+      if (errorMessage === 'ARTWORK_TOO_LARGE' || errorMessage === 'PAYLOAD_TOO_LARGE') {
+        const message = 'Artwork is too large for processing. Please upload a smaller file (recommended under 700KB).';
+        toast.error(message);
+        setResult({
+          status: 'error',
+          error: 'payload_too_large',
+          message,
+        });
+        return;
+      }
       
       toast.error('Failed to generate concepts. Please try again.');
       
