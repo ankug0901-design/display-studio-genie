@@ -80,7 +80,7 @@ export function usePOSDesigner() {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       if (errorMessage === 'ARTWORK_TOO_LARGE' || errorMessage === 'PAYLOAD_TOO_LARGE') {
-        const message = 'Artwork is too large for processing. Please upload a smaller file (recommended under 700KB).';
+        const message = 'Artwork is too large for processing. Please upload a smaller file (recommended under 1200KB).';
         toast.error(message);
         setResult({
           status: 'error',

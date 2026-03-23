@@ -147,7 +147,7 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
                   const file = e.target.files?.[0] || null;
                   if (file && file.size > MAX_ARTWORK_FILE_BYTES) {
                     setArtworkFile(null);
-                    toast.error('File too large. Please upload artwork under 700KB.');
+                    toast.error('File too large. Please upload artwork under 1200KB.');
                     if (fileInputRef.current) fileInputRef.current.value = '';
                     return;
                   }
