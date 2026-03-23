@@ -9,24 +9,44 @@ export function usePOSDesigner() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<POSDesignResponse | null>(null);
 
-  const submitBrief = useCallback(async (brief: POSDesignBrief) => {
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const result = reader.result as string;
+        const base64 = result.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const submitBrief = useCallback(async (brief: POSDesignBrief, artworkFile?: File | null) => {
     setIsLoading(true);
     setResult(null);
 
     try {
+      const payload: Record<string, unknown> = {
+        brand_name: brief.brand_name,
+        product_category: brief.product_category,
+        display_type: brief.display_type,
+        quantity: brief.quantity,
+        objective: brief.objective,
+        size: brief.size || undefined,
+        material: brief.material || undefined,
+        budget: brief.budget || undefined,
+        store_environment: brief.store_environment || undefined,
+        placement_location: brief.placement_location?.join(', ') || undefined,
+      };
+
+      if (artworkFile) {
+        payload.artwork_base64 = await fileToBase64(artworkFile);
+        payload.artwork_mime_type = artworkFile.type;
+      }
+
       const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
-        body: {
-          brand_name: brief.brand_name,
-          product_category: brief.product_category,
-          display_type: brief.display_type,
-          quantity: brief.quantity,
-          objective: brief.objective,
-          size: brief.size || undefined,
-          material: brief.material || undefined,
-          budget: brief.budget || undefined,
-          store_environment: brief.store_environment || undefined,
-          placement_location: brief.placement_location?.join(', ') || undefined,
-        },
+        body: payload,
       });
 
       if (error) throw error;

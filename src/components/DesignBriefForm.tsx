@@ -18,7 +18,7 @@ import {
 } from '@/types/posDesigner';
 
 interface DesignBriefFormProps {
-  onSubmit: (brief: POSDesignBrief) => void;
+  onSubmit: (brief: POSDesignBrief, artworkFile?: File | null) => void;
   isLoading: boolean;
 }
 
@@ -41,7 +41,7 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(formData);
+    onSubmit(formData, artworkFile);
   };
 
   const updateField = <K extends keyof POSDesignBrief>(field: K, value: POSDesignBrief[K]) => {
