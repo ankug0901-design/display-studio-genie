@@ -58,6 +58,8 @@ export const MATERIALS = [
   'Corrugated Cardboard',
   'Sunboard / Foam Board',
   'Metal / Steel',
+  'Plastic Honeycomb',
+  'Corrugated Plastic / PP Sheets',
   'Mixed Materials',
   'Eco-friendly / Recyclable',
   'No Preference'
