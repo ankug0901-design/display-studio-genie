@@ -106,11 +106,25 @@ export function usePOSDesigner() {
       });
 
       if (error) {
-        // Check if the error response contains payload_too_large
-        const errMsg = error.message || '';
+        // Try to read the response body from the error context
+        let errorBody: Record<string, unknown> | null = null;
+        try {
+          if (error.context && typeof error.context === 'object' && 'json' in error.context) {
+            errorBody = await (error.context as Response).json();
+          }
+        } catch { /* ignore parse errors */ }
+
+        const errMsg = errorBody?.message as string || errorBody?.error as string || error.message || '';
+        
         if (errMsg.includes('413') || errMsg.includes('payload_too_large')) {
           throw new Error('PAYLOAD_TOO_LARGE');
         }
+        
+        // If the n8n workflow returned an error, show it
+        if (errorBody?.message) {
+          throw new Error(String(errorBody.message));
+        }
+        
         throw error;
       }
 
