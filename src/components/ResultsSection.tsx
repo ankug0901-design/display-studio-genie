@@ -191,7 +191,7 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
                 <div key={idx} className="results-card p-5">
                   <div className="flex items-center gap-2 mb-3">
                     <span className="w-6 h-6 rounded-full bg-accent/15 text-accent text-xs font-bold flex items-center justify-center">
-                      {idx + 1}
+                      {concept.number}
                     </span>
                     <h4 className="text-base font-display font-semibold text-foreground">
                       {concept.title}
