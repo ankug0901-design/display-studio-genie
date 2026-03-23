@@ -18,7 +18,7 @@ import {
 } from '@/types/posDesigner';
 
 interface DesignBriefFormProps {
-  onSubmit: (brief: POSDesignBrief) => void;
+  onSubmit: (brief: POSDesignBrief, artworkFile?: File | null) => void;
   isLoading: boolean;
 }
 
