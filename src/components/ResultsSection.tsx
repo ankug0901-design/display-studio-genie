@@ -32,8 +32,10 @@ function parseConceptsText(text: string): ParsedConcept[] {
     });
 }
 
-function isInternalRef(url: string | null | undefined): boolean {
-  return !url || url.startsWith('filesystem-v2:');
+function shouldShowPlaceholder(url: string | null | undefined): boolean {
+  if (!url) return true;
+  if (url.startsWith('https://') || url.startsWith('data:')) return false;
+  return true;
 }
 
 export function ResultsSection({ result, isLoading, onReset }: ResultsSectionProps) {
