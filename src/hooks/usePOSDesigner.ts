@@ -4,17 +4,11 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const FUNCTION_NAME = 'pos-design-proxy';
-const MAX_WEBHOOK_PAYLOAD_BYTES = 1800 * 1024;
 const MAX_ARTWORK_FILE_BYTES = 1200 * 1024;
 
 export function usePOSDesigner() {
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<POSDesignResponse | null>(null);
-
-  const estimatePayloadSize = (payload: Record<string, unknown>) => {
-    const json = JSON.stringify(payload);
-    return new TextEncoder().encode(json).length;
-  };
 
   const fileToBase64 = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -26,6 +20,47 @@ export function usePOSDesigner() {
       };
       reader.onerror = reject;
       reader.readAsDataURL(file);
+    });
+  };
+
+  const compressImage = (file: File, maxSizeKB = 700): Promise<{ base64: string; mimeType: string }> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const canvas = document.createElement('canvas');
+        let { width, height } = img;
+
+        // Scale down if very large
+        const MAX_DIM = 1600;
+        if (width > MAX_DIM || height > MAX_DIM) {
+          const scale = MAX_DIM / Math.max(width, height);
+          width = Math.round(width * scale);
+          height = Math.round(height * scale);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return reject(new Error('Canvas not supported'));
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Try progressively lower quality
+        let quality = 0.8;
+        let dataUrl = canvas.toDataURL('image/jpeg', quality);
+        while (dataUrl.length * 0.75 > maxSizeKB * 1024 && quality > 0.2) {
+          quality -= 0.1;
+          dataUrl = canvas.toDataURL('image/jpeg', quality);
+        }
+
+        resolve({
+          base64: dataUrl.split(',')[1],
+          mimeType: 'image/jpeg',
+        });
+      };
+      img.onerror = () => reject(new Error('Failed to load image for compression'));
+      img.src = url;
     });
   };
 
@@ -52,22 +87,39 @@ export function usePOSDesigner() {
           throw new Error('ARTWORK_TOO_LARGE');
         }
 
-        payload.artwork_base64 = await fileToBase64(artworkFile);
-        payload.artwork_mime_type = artworkFile.type;
-      }
+        const isImage = artworkFile.type.startsWith('image/');
 
-      if (estimatePayloadSize(payload) > MAX_WEBHOOK_PAYLOAD_BYTES) {
-        throw new Error('PAYLOAD_TOO_LARGE');
+        if (isImage) {
+          // Compress images to reduce base64 payload size
+          const compressed = await compressImage(artworkFile);
+          payload.artwork_base64 = compressed.base64;
+          payload.artwork_mime_type = compressed.mimeType;
+        } else {
+          // PDFs and other files sent as-is
+          payload.artwork_base64 = await fileToBase64(artworkFile);
+          payload.artwork_mime_type = artworkFile.type;
+        }
       }
 
       const { data, error } = await supabase.functions.invoke(FUNCTION_NAME, {
         body: payload,
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if the error response contains payload_too_large
+        const errMsg = error.message || '';
+        if (errMsg.includes('413') || errMsg.includes('payload_too_large')) {
+          throw new Error('PAYLOAD_TOO_LARGE');
+        }
+        throw error;
+      }
 
       const responseData = data as POSDesignResponse;
       
+      if (responseData?.error === 'payload_too_large') {
+        throw new Error('PAYLOAD_TOO_LARGE');
+      }
+
       if (responseData.status === 'limit_reached') {
         toast.warning('Daily limit reached. Please try again tomorrow.');
       } else if (responseData.status === 'success') {
@@ -80,7 +132,7 @@ export function usePOSDesigner() {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       if (errorMessage === 'ARTWORK_TOO_LARGE' || errorMessage === 'PAYLOAD_TOO_LARGE') {
-        const message = 'Artwork is too large for processing. Please upload a smaller file (recommended under 1200KB).';
+        const message = 'Artwork file is too large for processing. Try uploading a smaller or lower-resolution file, or increase your n8n server\'s nginx client_max_body_size.';
         toast.error(message);
         setResult({
           status: 'error',
