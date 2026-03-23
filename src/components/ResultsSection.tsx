@@ -32,8 +32,10 @@ function parseConceptsText(text: string): ParsedConcept[] {
     });
 }
 
-function isInternalRef(url: string | null | undefined): boolean {
-  return !url || url.startsWith('filesystem-v2:');
+function shouldShowPlaceholder(url: string | null | undefined): boolean {
+  if (!url) return true;
+  if (url.startsWith('https://') || url.startsWith('data:')) return false;
+  return true;
 }
 
 export function ResultsSection({ result, isLoading, onReset }: ResultsSectionProps) {
@@ -144,7 +146,7 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
           <Image className="w-4 h-4 text-accent" />
           <span className="text-sm font-medium text-foreground">3D Visualization</span>
         </div>
-        {isInternalRef(result.hero_render) ? (
+        {shouldShowPlaceholder(result.hero_render) ? (
           <div className="flex flex-col items-center justify-center py-16 px-6 bg-gradient-to-br from-secondary/50 to-muted/50 text-center">
             <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
               <Image className="w-8 h-8 text-accent/50" />
