@@ -24,6 +24,8 @@ interface DesignBriefFormProps {
 
 export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [artworkFile, setArtworkFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<POSDesignBrief>({
     brand_name: '',
     product_category: '',
