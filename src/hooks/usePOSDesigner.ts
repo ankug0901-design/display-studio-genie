@@ -4,8 +4,8 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 
 const FUNCTION_NAME = 'pos-design-proxy';
-const MAX_WEBHOOK_PAYLOAD_BYTES = 900 * 1024;
-const MAX_ARTWORK_FILE_BYTES = 700 * 1024;
+const MAX_WEBHOOK_PAYLOAD_BYTES = 1800 * 1024;
+const MAX_ARTWORK_FILE_BYTES = 1200 * 1024;
 
 export function usePOSDesigner() {
   const [isLoading, setIsLoading] = useState(false);

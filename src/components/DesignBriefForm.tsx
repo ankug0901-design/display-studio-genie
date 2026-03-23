@@ -24,7 +24,7 @@ interface DesignBriefFormProps {
 }
 
 export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
-  const MAX_ARTWORK_FILE_BYTES = 700 * 1024;
+  const MAX_ARTWORK_FILE_BYTES = 1200 * 1024;
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [artworkFile, setArtworkFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
