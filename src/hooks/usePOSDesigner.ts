@@ -119,6 +119,9 @@ export function usePOSDesigner() {
         if (errMsg.includes('413') || errMsg.includes('payload_too_large')) {
           throw new Error('PAYLOAD_TOO_LARGE');
         }
+        if (errMsg.includes('504') || errMsg.includes('gateway_timeout') || errMsg.includes('Gateway Time-out')) {
+          throw new Error('GATEWAY_TIMEOUT');
+        }
         
         // If the n8n workflow returned an error, show it
         if (errorBody?.message) {
