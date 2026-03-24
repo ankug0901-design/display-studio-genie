@@ -149,13 +149,16 @@ export function usePOSDesigner() {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
 
       if (errorMessage === 'ARTWORK_TOO_LARGE' || errorMessage === 'PAYLOAD_TOO_LARGE') {
-        const message = 'Artwork file is too large for processing. Try uploading a smaller or lower-resolution file, or increase your n8n server\'s nginx client_max_body_size.';
+        const message = 'Artwork file is too large for processing. Try uploading a smaller or lower-resolution file.';
         toast.error(message);
-        setResult({
-          status: 'error',
-          error: 'payload_too_large',
-          message,
-        });
+        setResult({ status: 'error', error: 'payload_too_large', message });
+        return;
+      }
+
+      if (errorMessage === 'GATEWAY_TIMEOUT') {
+        const message = 'The design generation is taking longer than expected. Please try again without artwork, or with a smaller file.';
+        toast.error(message);
+        setResult({ status: 'error', error: 'gateway_timeout', message });
         return;
       }
       
