@@ -41,13 +41,20 @@ serve(async (req) => {
         JSON.stringify({
           status: "error",
           error: "payload_too_large",
-          message:
-            "Artwork file is too large for processing. Please upload a smaller file (recommended under 1200KB).",
+          message: "Artwork file is too large for processing. Please upload a smaller file (recommended under 1200KB).",
         }),
-        {
-          status: 413,
-          headers: { ...corsHeaders, "content-type": "application/json" },
-        }
+        { status: 413, headers: { ...corsHeaders, "content-type": "application/json" } }
+      );
+    }
+
+    if (response.status === 504) {
+      return new Response(
+        JSON.stringify({
+          status: "error",
+          error: "gateway_timeout",
+          message: "The design generation is taking longer than expected. Please try again without artwork, or with a smaller file.",
+        }),
+        { status: 504, headers: { ...corsHeaders, "content-type": "application/json" } }
       );
     }
 
