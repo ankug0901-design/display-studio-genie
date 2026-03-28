@@ -110,6 +110,9 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
     { icon: Hash, label: 'Quantity', value: result.quantity?.toLocaleString() },
   ].filter(item => item.value);
 
+  const styleKey = result.style_label?.split(' ')[0]?.toLowerCase();
+  const styleMeta = styleKey ? STYLE_META[styleKey] : null;
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
