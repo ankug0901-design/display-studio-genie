@@ -1,7 +1,14 @@
 import { useState, useMemo } from 'react';
-import { Lightbulb, Image, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Tag, MapPin, Store, Package, Hash } from 'lucide-react';
+import { Lightbulb, Image, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Tag, MapPin, Store, Package, Hash, Crown, Zap, Layers, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { POSDesignResponse } from '@/types/posDesigner';
+
+const STYLE_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
+  premium: { label: 'Premium & Elegant', icon: Crown,  color: 'text-amber-600 bg-amber-50 border-amber-200' },
+  bold:    { label: 'Bold & High-Impact', icon: Zap,   color: 'text-rose-600 bg-rose-50 border-rose-200' },
+  minimal: { label: 'Minimal & Clean',   icon: Layers, color: 'text-sky-600 bg-sky-50 border-sky-200' },
+  eco:     { label: 'Eco & Sustainable', icon: Leaf,   color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+};
 
 interface ResultsSectionProps {
   result: POSDesignResponse | null;
