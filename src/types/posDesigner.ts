@@ -24,6 +24,8 @@ export interface POSDesignResponse {
   placement_location?: string;
   concepts_text?: string;
   hero_render?: string | null;
+  style_label?: string;
+  posm_type_label?: string;
   message?: string;
   error?: string;
 }
