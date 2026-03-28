@@ -9,6 +9,8 @@ export interface POSDesignBrief {
   budget?: string;
   store_environment?: string;
   placement_location?: string[];
+  style?: StyleOption;
+  strict_mode?: boolean;
 }
 
 export interface POSDesignResponse {
@@ -22,6 +24,8 @@ export interface POSDesignResponse {
   placement_location?: string;
   concepts_text?: string;
   hero_render?: string | null;
+  style_label?: string;
+  posm_type_label?: string;
   message?: string;
   error?: string;
 }
@@ -86,3 +90,12 @@ export const PLACEMENT_LOCATIONS = [
   'Near Competitor Products',
   'GT Store'
 ] as const;
+
+export const STYLE_OPTIONS = [
+  { value: 'premium', label: 'Premium & Elegant', description: 'Matte finishes, minimal luxury, upscale aesthetic' },
+  { value: 'bold',    label: 'Bold & High-Impact', description: 'Vibrant colors, high contrast, strong shelf standout' },
+  { value: 'minimal', label: 'Minimal & Clean',   description: 'White space, simple geometry, product-first' },
+  { value: 'eco',     label: 'Eco & Sustainable', description: 'Kraft textures, earth tones, recycled material look' },
+] as const;
+
+export type StyleOption = typeof STYLE_OPTIONS[number]['value'];
