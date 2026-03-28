@@ -24,7 +24,12 @@ serve(async (req) => {
       body = await req.arrayBuffer();
       headers["content-type"] = contentType;
     } else {
-      body = await req.text();
+      const json = await req.json();
+      // Sanitise new fields so the downstream workflow always gets valid values
+      const validStyles = ["premium", "bold", "minimal", "eco"];
+      json.style = validStyles.includes(json.style) ? json.style : "premium";
+      json.strict_mode = typeof json.strict_mode === "boolean" ? json.strict_mode : true;
+      body = JSON.stringify(json);
       headers["content-type"] = "application/json";
     }
 
