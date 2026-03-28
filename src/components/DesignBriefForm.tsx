@@ -41,6 +41,8 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
     budget: '',
     store_environment: '',
     placement_location: [],
+    style: 'premium' as StyleOption,
+    strict_mode: true,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
