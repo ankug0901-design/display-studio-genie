@@ -146,6 +146,22 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
                 </div>
               </div>
             ))}
+            {result.style_label && styleMeta && (() => {
+              const StyleIcon = styleMeta.icon;
+              return (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <StyleIcon className="w-4 h-4 text-accent" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Visual Style</p>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${styleMeta.color}`}>
+                      {styleMeta.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}

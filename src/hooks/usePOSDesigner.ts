@@ -80,6 +80,8 @@ export function usePOSDesigner() {
         budget: brief.budget || undefined,
         store_environment: brief.store_environment || undefined,
         placement_location: brief.placement_location?.join(', ') || undefined,
+        style: brief.style ?? 'premium',
+        strict_mode: brief.strict_mode ?? true,
       };
 
       if (artworkFile) {
