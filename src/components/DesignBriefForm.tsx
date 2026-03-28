@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { FileText, Settings2, Sparkles, ChevronDown, Upload, X } from 'lucide-react';
+import { FileText, Settings2, Sparkles, ChevronDown, Upload, X, Crown, Zap, Layers, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,6 +15,8 @@ import {
   MATERIALS,
   STORE_ENVIRONMENTS,
   PLACEMENT_LOCATIONS,
+  STYLE_OPTIONS,
+  StyleOption,
 } from '@/types/posDesigner';
 import { toast } from 'sonner';
 
@@ -39,6 +41,8 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
     budget: '',
     store_environment: '',
     placement_location: [],
+    style: 'premium' as StyleOption,
+    strict_mode: true,
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -181,6 +185,50 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
               )}
             </FormField>
           </div>
+        </div>
+      </FormSection>
+
+      {/* Visual Style Section */}
+      <FormSection title="Visual Style" icon={<Crown className="w-4 h-4 text-accent" />}>
+        <div className="grid grid-cols-2 gap-3">
+          {STYLE_OPTIONS.map(opt => {
+            const icons = { premium: Crown, bold: Zap, minimal: Layers, eco: Leaf };
+            const Icon = icons[opt.value as keyof typeof icons];
+            const isSelected = formData.style === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => updateField('style', opt.value)}
+                className={`flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-colors ${
+                  isSelected
+                    ? 'border-accent bg-accent/10'
+                    : 'border-muted hover:border-accent/40'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isSelected ? 'text-accent' : 'text-muted-foreground'}`} />
+                <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                <span className="text-xs text-muted-foreground">{opt.description}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-4">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <Checkbox
+              checked={formData.strict_mode}
+              onCheckedChange={(checked) => updateField('strict_mode', checked === true)}
+              className="mt-0.5"
+            />
+            <div>
+              <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
+                Strict Structure Mode
+              </span>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Locks the display geometry so the AI cannot reinterpret structure for aesthetics. Recommended ON.
+              </p>
+            </div>
+          </label>
         </div>
       </FormSection>
 
