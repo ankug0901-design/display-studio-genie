@@ -23,7 +23,7 @@ export function usePOSDesigner() {
     });
   };
 
-  const compressImage = (file: File, maxSizeKB = 700): Promise<{ base64: string; mimeType: string }> => {
+  const compressImage = (file: File, maxSizeKB = 400): Promise<{ base64: string; mimeType: string }> => {
     return new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
@@ -33,7 +33,7 @@ export function usePOSDesigner() {
         let { width, height } = img;
 
         // Scale down if very large
-        const MAX_DIM = 1600;
+        const MAX_DIM = 800;
         if (width > MAX_DIM || height > MAX_DIM) {
           const scale = MAX_DIM / Math.max(width, height);
           width = Math.round(width * scale);
@@ -47,9 +47,9 @@ export function usePOSDesigner() {
         ctx.drawImage(img, 0, 0, width, height);
 
         // Try progressively lower quality
-        let quality = 0.8;
+        let quality = 0.7;
         let dataUrl = canvas.toDataURL('image/jpeg', quality);
-        while (dataUrl.length * 0.75 > maxSizeKB * 1024 && quality > 0.2) {
+        while (dataUrl.length * 0.75 > maxSizeKB * 1024 && quality > 0.15) {
           quality -= 0.1;
           dataUrl = canvas.toDataURL('image/jpeg', quality);
         }
