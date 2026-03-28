@@ -9,6 +9,8 @@ export interface POSDesignBrief {
   budget?: string;
   store_environment?: string;
   placement_location?: string[];
+  style?: StyleOption;
+  strict_mode?: boolean;
 }
 
 export interface POSDesignResponse {
