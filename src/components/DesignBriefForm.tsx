@@ -188,6 +188,50 @@ export function DesignBriefForm({ onSubmit, isLoading }: DesignBriefFormProps) {
         </div>
       </FormSection>
 
+      {/* Visual Style Section */}
+      <FormSection title="Visual Style" icon={<Crown className="w-4 h-4 text-accent" />}>
+        <div className="grid grid-cols-2 gap-3">
+          {STYLE_OPTIONS.map(opt => {
+            const icons = { premium: Crown, bold: Zap, minimal: Layers, eco: Leaf };
+            const Icon = icons[opt.value as keyof typeof icons];
+            const isSelected = formData.style === opt.value;
+            return (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => updateField('style', opt.value)}
+                className={`flex flex-col items-start gap-1.5 p-4 rounded-xl border-2 text-left transition-colors ${
+                  isSelected
+                    ? 'border-accent bg-accent/10'
+                    : 'border-muted hover:border-accent/40'
+                }`}
+              >
+                <Icon className={`w-5 h-5 ${isSelected ? 'text-accent' : 'text-muted-foreground'}`} />
+                <span className="text-sm font-medium text-foreground">{opt.label}</span>
+                <span className="text-xs text-muted-foreground">{opt.description}</span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="mt-4">
+          <label className="flex items-start gap-3 cursor-pointer group">
+            <Checkbox
+              checked={formData.strict_mode}
+              onCheckedChange={(checked) => updateField('strict_mode', checked === true)}
+              className="mt-0.5"
+            />
+            <div>
+              <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
+                Strict Structure Mode
+              </span>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Locks the display geometry so the AI cannot reinterpret structure for aesthetics. Recommended ON.
+              </p>
+            </div>
+          </label>
+        </div>
+      </FormSection>
+
       {/* Advanced Options */}
       <Collapsible open={advancedOpen} onOpenChange={setAdvancedOpen}>
         <CollapsibleTrigger asChild>
