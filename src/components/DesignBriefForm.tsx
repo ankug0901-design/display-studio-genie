@@ -15,6 +15,8 @@ import {
   MATERIALS,
   STORE_ENVIRONMENTS,
   PLACEMENT_LOCATIONS,
+  STYLE_OPTIONS,
+  StyleOption,
 } from '@/types/posDesigner';
 import { toast } from 'sonner';
 
