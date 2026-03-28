@@ -1,7 +1,14 @@
 import { useState, useMemo } from 'react';
-import { Lightbulb, Image, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Tag, MapPin, Store, Package, Hash } from 'lucide-react';
+import { Lightbulb, Image, AlertCircle, ChevronDown, ChevronUp, RefreshCw, Tag, MapPin, Store, Package, Hash, Crown, Zap, Layers, Leaf } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { POSDesignResponse } from '@/types/posDesigner';
+
+const STYLE_META: Record<string, { label: string; icon: React.ComponentType<{ className?: string }>; color: string }> = {
+  premium: { label: 'Premium & Elegant', icon: Crown,  color: 'text-amber-600 bg-amber-50 border-amber-200' },
+  bold:    { label: 'Bold & High-Impact', icon: Zap,   color: 'text-rose-600 bg-rose-50 border-rose-200' },
+  minimal: { label: 'Minimal & Clean',   icon: Layers, color: 'text-sky-600 bg-sky-50 border-sky-200' },
+  eco:     { label: 'Eco & Sustainable', icon: Leaf,   color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+};
 
 interface ResultsSectionProps {
   result: POSDesignResponse | null;
@@ -103,6 +110,9 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
     { icon: Hash, label: 'Quantity', value: result.quantity?.toLocaleString() },
   ].filter(item => item.value);
 
+  const styleKey = result.style_label?.split(' ')[0]?.toLowerCase();
+  const styleMeta = styleKey ? STYLE_META[styleKey] : null;
+
   return (
     <div className="space-y-6 animate-slide-up">
       {/* Header */}
@@ -136,6 +146,22 @@ export function ResultsSection({ result, isLoading, onReset }: ResultsSectionPro
                 </div>
               </div>
             ))}
+            {result.style_label && styleMeta && (() => {
+              const StyleIcon = styleMeta.icon;
+              return (
+                <div className="flex items-start gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <StyleIcon className="w-4 h-4 text-accent" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground">Visual Style</p>
+                    <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border ${styleMeta.color}`}>
+                      {styleMeta.label}
+                    </span>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
         </div>
       )}
