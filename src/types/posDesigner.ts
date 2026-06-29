@@ -52,6 +52,8 @@ export interface POSDesignResponse {
   posm_type_label?: string;
   message?: string;
   error?: string;
+}
+
 
 
 export const PRODUCT_CATEGORIES = [
