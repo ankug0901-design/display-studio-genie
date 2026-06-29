@@ -13,22 +13,48 @@ export interface POSDesignBrief {
   strict_mode?: boolean;
 }
 
+export interface ConceptSpec {
+  number: number;
+  title: string;
+  style: string;
+  rationale?: string;
+  size?: string;
+  material?: string;
+  printing?: string;
+  finishing?: string;
+  assembly?: string;
+  packing?: string;
+  placement?: string;
+  visual_description?: string;
+}
+
+export interface HeroRender {
+  concept_number: number;
+  concept_title: string;
+  style: string;
+  image_url: string;
+}
+
 export interface POSDesignResponse {
   status: 'success' | 'error' | 'limit_reached';
   brand?: string;
   product_category?: string;
   posm_type?: string;
-  quantity?: number;
+  quantity?: number | string;
   objective?: string;
   store_environment?: string;
   placement_location?: string;
+  concepts?: ConceptSpec[];
   concepts_text?: string;
+  hero_renders?: HeroRender[];
   hero_render?: string | null;
   style_label?: string;
   posm_type_label?: string;
   message?: string;
   error?: string;
 }
+
+
 
 export const PRODUCT_CATEGORIES = [
   'Beauty & Cosmetics',
